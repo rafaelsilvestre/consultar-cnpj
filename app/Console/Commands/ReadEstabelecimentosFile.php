@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Company;
+use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -42,7 +42,7 @@ class ReadEstabelecimentosFile extends Command
     public function handle()
     {
         try {
-            $handle = fopen("C:\Users\cliente\Downloads\Estabelecimentos0\K3241.K03200Y0.D30114.ESTABELE", "r");
+            $handle = fopen(storage_path() . '/app/estabelecimentos/Estabelecimentos8', "r");
 
             $row = 0;
             while ($line = fgetcsv($handle, 1000, ";")) {
@@ -50,24 +50,86 @@ class ReadEstabelecimentosFile extends Command
                     continue;
                 }
 
+                if (!isset($line[0]) || !isset($line[1]) || !isset($line[2])) {
+                    $this->info(print_r($line));
+                    continue;
+                }
+
+                $document = $line[0] . $line[1] . $line[2];
+
+                if (!$this->verifyCNPJ($document)) {
+                   $this->error('CNPJ inválido');
+                   $this->error($document);
+                   continue;
+                }
+
+                $this->info("----------------------------------------");
                 $this->info("CNPJ - " . $line[0] . $line[1] . $line[2]);
                 $this->info("NOME FANTASIA - " . ($line[4] ?? ''));
                 $this->info("SITUAÇÃO CADASTRAL - " . ($line[5] ?? ''));
                 $this->info("DATA SITUAÇÃO CADASTRAL - " . ($line[6] ?? ''));
 
-                DB::table('companies')->insertOrIgnore([
-                    [
-                        'cnpj' => $line[0] . $line[1] . $line[2],
-                        'fantasy_name' => ($line[4] ?? null),
-                        'registration_status' => ($line[5] ?? null),
-                        'registration_status_at' => isset($line[6]) ? Carbon::parse($line[6]) : null,
-                        'created_at' => now(),
-                        'updated_at' => now()
-                    ]
-                ]);
+                try {
+                    $registration_status_at = null;
+
+                    if (isset($line[6])) {
+                        $registration_status_at = Carbon::parse($line[6]);
+                    }
+                } catch (InvalidFormatException $e) {
+                    $registration_status_at = null;
+                }
+
+                DB::table('companies')
+                    ->insertOrIgnore([
+                        [
+                            'cnpj' => $line[0] . $line[1] . $line[2],
+                            'fantasy_name' => ($line[4] ?? null),
+                            'registration_status' => ($line[5] ?? null),
+                            'registration_status_at' => $registration_status_at,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]
+                    ]);
             }
         } catch (Throwable $e) {
             $this->error($e->getMessage());
         }
+    }
+
+    private function verifyCNPJ($cnpj)
+    {
+        $cnpj = preg_replace('/[^0-9]/', '', (string) $cnpj);
+
+        // Valida tamanho
+        if (strlen($cnpj) != 14) {
+            return false;
+        }
+
+        // Verifica se todos os digitos são iguais
+        if (preg_match('/(\d)\1{13}/', $cnpj)) {
+            return false;
+        }
+
+        // Valida primeiro dígito verificador
+        for ($i = 0, $j = 5, $soma = 0; $i < 12; $i++) {
+            $soma += $cnpj[$i] * $j;
+            $j = ($j == 2) ? 9 : $j - 1;
+        }
+
+        $resto = $soma % 11;
+
+        if ($cnpj[12] != ($resto < 2 ? 0 : 11 - $resto)) {
+            return false;
+        }
+
+        // Valida segundo dígito verificador
+        for ($i = 0, $j = 6, $soma = 0; $i < 13; $i++) {
+            $soma += $cnpj[$i] * $j;
+            $j = ($j == 2) ? 9 : $j - 1;
+        }
+
+        $resto = $soma % 11;
+
+        return $cnpj[13] == ($resto < 2 ? 0 : 11 - $resto);
     }
 }
