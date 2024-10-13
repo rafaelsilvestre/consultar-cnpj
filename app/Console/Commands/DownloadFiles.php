@@ -3,9 +3,7 @@
 namespace App\Console\Commands;
 
 use Carbon\Carbon;
-use \GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Utils;
+use GuzzleHttp\Client;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -91,7 +89,7 @@ class DownloadFiles extends Command
                     try {
                         $attempts++;
 
-                        $headers = get_headers($this->url . '/CNPJ/' . $file, true);
+                        $headers = get_headers($this->url . '/CNPJ/dados_abertos_cnpj/2024-09/' . $file, true);
 
                         if (!isset($headers['Last-Modified'])) {
                             return;
@@ -101,8 +99,9 @@ class DownloadFiles extends Command
 
                         $lastModified = Cache::get('Last-Modified:' . $file);
 
-                        if (!$lastModified) {
+                        if (! $lastModified) {
                             $this->info('Not exists  last modified');
+
                             $this->handleDownloadFile($file);
 
                             return;
@@ -110,10 +109,11 @@ class DownloadFiles extends Command
 
                         if ($lastModified->lt($headers['Last-Modified'])) {
                             $this->info('New file exists');
+
                             $this->handleDownloadFile($file);
                         }
                     } catch (Throwable $e) {
-                        Log::channel('daily')->error('Erro ao baixar arquivo de dados abertos', [
+                        Log::error('Erro ao baixar arquivo de dados abertos', [
                             'file' => $file,
                             'error' => $this->exceptionToArray($e),
                         ]);
@@ -130,6 +130,11 @@ class DownloadFiles extends Command
             });
     }
 
+    /**
+     * @param string $file
+     * @return void
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     private function handleDownloadFile(string $file)
     {
         $this->comment('[' . $file . '] Handle Download');
@@ -144,6 +149,10 @@ class DownloadFiles extends Command
         $this->info('[' . $file . '] File downloaded');
     }
 
+    /**
+     * @param $exception
+     * @return array
+     */
     private function exceptionToArray($exception)
     {
         return [

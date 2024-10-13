@@ -3,10 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Cnae;
-use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class ReadCnaesFile extends Command

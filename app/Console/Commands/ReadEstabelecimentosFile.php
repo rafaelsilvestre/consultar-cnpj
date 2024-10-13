@@ -42,7 +42,7 @@ class ReadEstabelecimentosFile extends Command
     public function handle()
     {
         try {
-            $handle = fopen(storage_path() . '/app/estabelecimentos/Estabelecimentos8', "r");
+            $handle = fopen(storage_path() . '/app/Estabelecimentos0', "r");
 
             $row = 0;
             while ($line = fgetcsv($handle, 1000, ";")) {
@@ -57,7 +57,7 @@ class ReadEstabelecimentosFile extends Command
 
                 $document = $line[0] . $line[1] . $line[2];
 
-                if (!$this->verifyCNPJ($document)) {
+                if (! $this->verifyCNPJ($document)) {
                    $this->error('CNPJ inválido');
                    $this->error($document);
                    continue;
@@ -68,6 +68,7 @@ class ReadEstabelecimentosFile extends Command
                 $this->info("NOME FANTASIA - " . ($line[4] ?? ''));
                 $this->info("SITUAÇÃO CADASTRAL - " . ($line[5] ?? ''));
                 $this->info("DATA SITUAÇÃO CADASTRAL - " . ($line[6] ?? ''));
+                $this->info("CNAES - " . ($line[12] ?? ''));
 
                 try {
                     $registration_status_at = null;
