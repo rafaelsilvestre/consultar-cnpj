@@ -139,8 +139,8 @@ class DownloadFiles extends Command
     {
         $this->comment('[' . $file . '] Handle Download');
 
-        $result = $this->http->request('GET', '/CNPJ/' . $file, [
-            'debug' => true,
+        $result = $this->http->request('GET', '/CNPJ/dados_abertos_cnpj/2024-09/' . $file, [
+            'debug' => false,
         ]);
 
         Storage::disk(config('filesystems.default'))
