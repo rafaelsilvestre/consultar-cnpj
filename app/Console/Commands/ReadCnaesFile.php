@@ -40,7 +40,7 @@ class ReadCnaesFile extends Command
     public function handle()
     {
         try {
-            $handle = fopen(storage_path() . '/app/cnaes', "r");
+            $handle = fopen(storage_path() . '/cnaes', "r");
 
             $row = 0;
             while ($line = fgetcsv($handle, 1000, ";")) {

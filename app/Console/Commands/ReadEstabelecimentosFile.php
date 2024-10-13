@@ -15,7 +15,7 @@ class ReadEstabelecimentosFile extends Command
      *
      * @var string
      */
-    protected $signature = 'read-estabelecimentos-file';
+    protected $signature = 'read-estabelecimentos-file {filename}';
 
     /**
      * The console command description.
@@ -42,10 +42,20 @@ class ReadEstabelecimentosFile extends Command
     public function handle()
     {
         try {
-            $handle = fopen(storage_path() . '/app/Estabelecimentos0', "r");
+            if (! $this->argument('filename')) {
+                $this->error('File name not provided');
+                return;
+            }
+
+            if (! file_exists(storage_path('Estabelecimentos/' . $this->argument('filename')))) {
+                $this->error('File not exists');
+                return;
+            }
+
+            $handle = fopen(storage_path('Estabelecimentos/' . $this->argument('filename')), "r");
 
             $row = 0;
-            while ($line = fgetcsv($handle, 1000, ";")) {
+            while ($line = fgetcsv($handle, 500, ";")) {
                 if ($row++ == 0) {
                     continue;
                 }

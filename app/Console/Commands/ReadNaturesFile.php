@@ -44,7 +44,7 @@ class ReadNaturesFile extends Command
     public function handle()
     {
         try {
-            $handle = fopen(storage_path() . '/app/natures', "r");
+            $handle = fopen(storage_path() . '/natures', "r");
 
             $row = 0;
             while ($line = fgetcsv($handle, 1000, ";")) {
