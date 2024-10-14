@@ -19,5 +19,6 @@ class Company extends Model
         'fantasy_name',
         'registration_status',
         'registration_status_at',
+        'main_activity',
     ];
 }

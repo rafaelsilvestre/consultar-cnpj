@@ -78,7 +78,7 @@ class ReadEstabelecimentosFile extends Command
                 $this->info("NOME FANTASIA - " . ($line[4] ?? ''));
                 $this->info("SITUAÇÃO CADASTRAL - " . ($line[5] ?? ''));
                 $this->info("DATA SITUAÇÃO CADASTRAL - " . ($line[6] ?? ''));
-                $this->info("CNAES - " . ($line[12] ?? ''));
+                $this->info("CNAES - " . ($line[11] ?? ''));
 
                 try {
                     $registration_status_at = null;
@@ -90,17 +90,26 @@ class ReadEstabelecimentosFile extends Command
                     $registration_status_at = null;
                 }
 
-                DB::table('companies')
-                    ->insertOrIgnore([
-                        [
-                            'cnpj' => $line[0] . $line[1] . $line[2],
-                            'fantasy_name' => ($line[4] ?? null),
-                            'registration_status' => ($line[5] ?? null),
-                            'registration_status_at' => $registration_status_at,
-                            'created_at' => now(),
-                            'updated_at' => now()
-                        ]
-                    ]);
+                $this->info("DATA DE REGISTRO - " . ($registration_status_at->format('Y-m-d H:i:s') ?? ''));
+
+                try {
+                    DB::table('companies')
+                        ->updateOrInsert(
+                            [
+                                'cnpj' => $line[0] . $line[1] . $line[2]
+                            ],
+                            [
+                                'fantasy_name' => ($line[4] ?? null),
+                                'registration_status' => ($line[5] ?? null),
+                                'registration_status_at' => $registration_status_at,
+                                'main_activity' => ($line[11] ?? null),
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ]
+                        );
+                } catch (Throwable $e) {
+                    $this->error($e->getMessage());
+                }
             }
         } catch (Throwable $e) {
             $this->error($e->getMessage());
