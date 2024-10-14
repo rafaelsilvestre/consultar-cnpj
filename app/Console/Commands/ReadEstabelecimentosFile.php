@@ -86,11 +86,11 @@ class ReadEstabelecimentosFile extends Command
                     if (isset($line[6])) {
                         $registration_status_at = Carbon::parse($line[6]);
                     }
+
+                    $this->info("DATA DE REGISTRO - " . ($registration_status_at->format('Y-m-d H:i:s') ?? ''));
                 } catch (InvalidFormatException $e) {
                     $registration_status_at = null;
                 }
-
-                $this->info("DATA DE REGISTRO - " . ($registration_status_at->format('Y-m-d H:i:s') ?? ''));
 
                 try {
                     DB::table('companies')
