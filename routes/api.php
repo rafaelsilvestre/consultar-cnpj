@@ -19,4 +19,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/search', [SearchController::class, 'handle']);
+Route::get('companies/search', [SearchController::class, 'find']);
+Route::get('companies', [SearchController::class, 'allCompanies']);
