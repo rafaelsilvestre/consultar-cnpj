@@ -9,6 +9,8 @@ class Company extends Model
 {
     use HasFactory;
 
+    protected $table = 'companies_opened';
+
     /**
      * The attributes that are mass assignable.
      *
