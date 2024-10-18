@@ -25,7 +25,8 @@ class SearchController extends Controller
             'main_activity' => 'nullable|string|max:255',
         ]);
 
-        $query = Company::query();
+        $query = (new Company)
+            ->onTable('companies_opened');
 
         if ($document = $request->input('document')) {
             $query = $query->where('cnpj', $document);

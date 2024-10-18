@@ -9,8 +9,6 @@ class Company extends Model
 {
     use HasFactory;
 
-    protected $table = 'companies_opened';
-
     /**
      * The attributes that are mass assignable.
      *
@@ -23,4 +21,15 @@ class Company extends Model
         'registration_status_at',
         'main_activity',
     ];
+
+    /**
+     * @param $table
+     * @return $this
+     */
+    public function onTable($table = 'companies')
+    {
+        $this->setTable($table);
+
+        return $this;
+    }
 }
